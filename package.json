@@ -1,0 +1,23 @@
+{
+  "name": "course_work_3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "request": "^2.81.0",
+    "request-promise-native": "^1.0.4",
+    "seisplotjs-miniseed": "^1.1.0",
+    "truffle": "^3.4.3",
+    "truffle-contract": "^2.0.1",
+    "web3": "^0.19.1"
+  },
+  "devDependencies": {
+    "chai": "^4.0.2",
+    "chai-as-promised": "^7.1.1"
+  }
+}
