@@ -1,35 +1,67 @@
 const {
   makeRequests,
   getSeismo,
-  putSeismo,
   parseSeismogram,
   getOrDeployContractInstance
 } = require('../app/seismo-service');
+const sinon = require('sinon');
+sinon.assert.expose(assert, { prefix: "" });
 
 describe('seismo service', () => {
-  it('should request data every interval', () => {
+  function seismogramFactory(length, pattern, acc) {
+    if (acc.length > length) {
+      return acc.slice(0,length);
+    }
+    return seismogramFactory(length, pattern, acc.concat(pattern));
+  }
 
+  before(() => {
+    this.clock = sinon.useFakeTimers();
   });
-  it('should not update the seismo chat contract if there is no sufficient data', () => {
 
+  after(() => {
+    this.clock.restore();
   });
-  it('should update the seismo chat contract if there is sufficient data', () => {
 
+  it('should request data and update contract every interval', (done) => {
+    const getSpy = sinon.stub().resolves('seismo');
+    const put = sinon.stub().resolves('tx_id');
+    const intervalId = makeRequests(getSpy, put, 10)
+    this.clock.tick(25);
+    assert.calledTwice(getSpy);
+    assert.calledTwice(put);
+    clearInterval(intervalId);
+    done()
   });
-  it('should not throw an error if the request fails', () => {
 
+  it('should continue if a request fails, but not update contract', (done) => {
+    const getSpy = sinon.stub().rejects();
+    const put = sinon.stub().resolves('tx_id');
+    const intervalId = makeRequests(getSpy, put, 10);
+    this.clock.tick(25);
+    assert.calledTwice(getSpy);
+    assert.notCalled(put);
+    clearInterval(intervalId);
+    done()
   });
 
   it('should convert the seismogram to a 5 value scale', () => {
-
+    const expected = seismogramFactory(500, [-2,-1,0,0,1,2], []);
+    const result = parseSeismogram(
+      seismogramFactory(600, [-200, -100, -10, 10, 100, 200], []));
+    assert.deepEqual(expected, result);
   });
+
   it('should use the first five hundred elements of the seismogram', () => {
-
+    const result = parseSeismogram(
+      seismogramFactory(600, [-200, -100, -10, 10, 100, 200], []));
+    assert.equal(result.length, 500);
   });
+
   it('should throw an error if there are less than 500 measurements', () => {
-
-  });
-  it('should deploy a contract if no contract is deployed', () => {
-
+    assert.throws(() => { parseSeismogram(
+      seismogramFactory(450, [-200, -100, -10, 10, 100, 200], [])) },
+      'seismogram to short'
+    );
   });
 });

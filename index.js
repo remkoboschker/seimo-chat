@@ -1,5 +1,1 @@
-const {
-  runService
-} = require('./app/cli');
-
-runService();
+require('./app/cli')('http://localhost:8545');

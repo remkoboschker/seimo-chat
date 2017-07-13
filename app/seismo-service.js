@@ -1,28 +1,5 @@
 const request = require('request-promise-native');
 const seis = require('seisplotjs-miniseed');
-const Web3 = require('web3');
-const contract = require('truffle-contract');
-
-//const web3 = new Web3(new Web3.providers.HttpProvider('http://localhost:8545'));
-const provider = new Web3.providers.HttpProvider('http://localhost:8545');
-const seismoChatContract = contract(require('../build/contracts/SeismoChat.json'));
-
-async function getOrDeployContractInstance(contract, provider) {
-  contract.setProvider(provider);
-  try {
-    return await contract.deployed();
-  } catch (e) {
-    process.stdout.write(e.message);
-    try {
-      return await contract.new();
-    } catch (e) {
-      process.stdout.write(e.message);
-      process.exit(1);
-    }
-  }
-} 
-
-const seismoChat = getOrDeployContractInstance(seismoChatContract, provider);
 
 async function getRecords() {
   const end = new Date();
@@ -73,31 +50,48 @@ function parseSeismogram(seismogram) {
 }
 
 async function getSeismo() {
+  process.stdout.write(`${new Date().toISOString()} getting seismic data\n`);
   const records = await getRecords()
+  process.stdout.write(`${new Date().toISOString()} received seismic data\n`);
   const byChannel = seis.byChannel(records);
   const seismogram = seis.createSeismogram(byChannel['NL.G321..HHZ']);
   return parseSeismogram(seismogram.y());
 }
 
-async function putSeismo() {
-
-}
-
 function makeRequests(get, put, interval) {
-  setInterval(async function() {
+  return setInterval(async function() {
     try {
       const seismo = await get();
-      await put(seismo);
+      process.stdout.write(`${new Date().toISOString()} parsed seismic data\n`);
+      const tx = await put(seismo);
+      console.log(tx)
+      process.stdout.write(`${new Date().toISOString()} updated contract ${tx.tx}\n`);
     } catch (e) {
-      process.stdout.write(e);
+      process.stdout.write(`makeRequest: ${e.message}\n`);
     }
   }, interval);
+}
+
+function PutSeismo(contractInstance, serviceAddress) {
+  return function put (seismo) {
+    return contractInstance.setSeismo(seismo, { from: serviceAddress, gas: 4712388});
+  }
+}
+
+async function runService(contract, address) {
+  try {
+    const contractInstance = await contract.deployed();
+    makeRequests(getSeismo, PutSeismo(contractInstance, address), 50000);
+  } catch (e) {
+    process.stdout.write(`runService: ${e.message}`);
+    process.exit(1);
+  }
 }
 
 module.exports = {
   makeRequests,
   getSeismo,
-  putSeismo,
+  PutSeismo,
   parseSeismogram,
-  getOrDeployContractInstance
+  runService
 }
