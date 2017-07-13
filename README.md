@@ -20,7 +20,7 @@ Each in a different console run
 3. ``node --harmony index client --name mike``
 3. ``node --harmony index client --name julie``
 
-In the client consoles you can type a message followed by ``>>>barry`` or mike or julie. The message will be sent to the other console and the text is manipulated according to the seismic activity
+In the client consoles you can type a message followed by ``>>>barry`` (or mike or julie) and press return. The message will be sent to the other console and the text is manipulated according to the seismic activity
 
 ## Design
 
@@ -30,3 +30,6 @@ I initially started to implement the seismoChat service by writing an Ethereum c
 I therefore decided to change the architecture and only use the contract to store the seismic activity and manipulate the messages in the clients that can then use the Ethereum whisper protocol to send the message. This does not guarantee the manipulation to always be done in the way intended, because the client may have been modified. You do still know where you're sending the message and that the message is encrypted.
 
 So now a service collects and pre-processes the seismic activity from an online resource (http://rdsa.knmi.nl/fdsnws/dataselect/1/queryauth) and converts it to an array of five hundred values on a five value scale. These values are stored on the blockchain. The chat clients retrieve and use the values to manipulate the message entered by the user before it is encrypted and sent to another user.
+
+
+The testrpc does not support whisper, I decided to allow all messages to be recorded. Clients retrieve message via the logs

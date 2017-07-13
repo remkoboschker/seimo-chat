@@ -64,7 +64,6 @@ function makeRequests(get, put, interval) {
       const seismo = await get();
       process.stdout.write(`${new Date().toISOString()} parsed seismic data\n`);
       const tx = await put(seismo);
-      console.log(tx)
       process.stdout.write(`${new Date().toISOString()} updated contract ${tx.tx}\n`);
     } catch (e) {
       process.stdout.write(`makeRequest: ${e.message}\n`);

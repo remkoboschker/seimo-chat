@@ -1,18 +1,13 @@
 const SeismoChat = artifacts.require('./SeismoChat.sol');
 
-function seismoFactory() {
-  const vals = [-2,-1,0,1,2];
-  let res = []
-  for(var i = 0; i < 100; i = i + 1) {
-    res = res.concat(vals);
-  }
-  return res;
-}
+const {
+  seismogramFactory
+} = require('./test-utils');
 
 contract('SeismoChat', accounts => {
   it('should set the seismo values', async () => {
     const instance = await SeismoChat.deployed();
-    const seismo = seismoFactory();
+    const seismo = seismogramFactory(500, [-2,-1,0,1,-2], []);
 
     await instance.setSeismo(seismo, {
       from: accounts[0]
@@ -34,7 +29,7 @@ contract('SeismoChat', accounts => {
   });
   it('should raise an event on update', async () => {
     const instance = await SeismoChat.deployed();
-    const seismo = seismoFactory();
+    const seismo = seismogramFactory(500, [-2,-1,0,1,-2], []);
     //console.log(instance);
     const seismoUpdatedEvent = instance.seismoUpdated(
       (error, result) => {

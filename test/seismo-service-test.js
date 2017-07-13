@@ -4,17 +4,13 @@ const {
   parseSeismogram,
   getOrDeployContractInstance
 } = require('../app/seismo-service');
+const {
+  seismogramFactory
+} = require('./test-utils');
 const sinon = require('sinon');
 sinon.assert.expose(assert, { prefix: "" });
 
 describe('seismo service', () => {
-  function seismogramFactory(length, pattern, acc) {
-    if (acc.length > length) {
-      return acc.slice(0,length);
-    }
-    return seismogramFactory(length, pattern, acc.concat(pattern));
-  }
-
   before(() => {
     this.clock = sinon.useFakeTimers();
   });
