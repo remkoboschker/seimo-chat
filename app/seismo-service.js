@@ -1,6 +1,16 @@
+// the service request data from seismographic network of the 
+// Royal Dutch Meteorological Institute. The data is from station
+// G321 located at the Hornbach store in Groningen. It reports seismic
+// movements at one meter depth. The data returned is in the miniseed format.
+// The format is parsed using https://github.com/crotwell/seisplotjs-miniseed.
+// At a set interval the request is made, the data parsed, mapped on a five value
+// representation and stored on the blockchain via the seismo chat contract.
+
 const request = require('request-promise-native');
 const seis = require('seisplotjs-miniseed');
 
+// makes the request for seismic data and parses it into an interal model
+// defined here https://github.com/crotwell/seisplotjs-model
 async function getRecords() {
   const end = new Date();
   const start = new Date(end.valueOf() - 500000);
@@ -25,6 +35,8 @@ async function getRecords() {
   return records;
 }
 
+// maps the values from the seismogram onto a five value representation
+// if the seismogram is shorten than 500 values, the function raises an error
 function parseSeismogram(seismogram) {
   if (seismogram.length < 500) {
     throw new Error('seismogram to short')
@@ -49,6 +61,7 @@ function parseSeismogram(seismogram) {
   });
 }
 
+// requests data, extracts measurement values and calls mapping
 async function getSeismo() {
   process.stdout.write(`${new Date().toISOString()} getting seismic data\n`);
   const records = await getRecords()
@@ -57,7 +70,7 @@ async function getSeismo() {
   const seismogram = seis.createSeismogram(byChannel['NL.G321..HHZ']);
   return parseSeismogram(seismogram.y());
 }
-
+ // gets the values and puts them somewhere at a regular interval
 function makeRequests(get, put, interval) {
   return setInterval(async function() {
     try {
@@ -71,12 +84,15 @@ function makeRequests(get, put, interval) {
   }, interval);
 }
 
+// closes over the contract and address and returns a function calls the 
+// contract to store the seismo values
 function PutSeismo(contractInstance, serviceAddress) {
   return function put (seismo) {
     return contractInstance.setSeismo(seismo, { from: serviceAddress, gas: 4712388});
   }
 }
 
+// set sup the contract instance and starts the requesting
 async function runService(contract, address) {
   try {
     const contractInstance = await contract.deployed();

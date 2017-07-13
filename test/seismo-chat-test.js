@@ -8,11 +8,9 @@ contract('SeismoChat', accounts => {
   it('should set the seismo values', async () => {
     const instance = await SeismoChat.deployed();
     const seismo = seismogramFactory(500, [-2,-1,0,1,-2], []);
-
     await instance.setSeismo(seismo, {
       from: accounts[0]
     })
-
     const seismoSetBig = await instance.getSeismo();
     const seismoSet = seismoSetBig.map(x => x.toNumber());
     assert.deepEqual(seismoSet, seismo);

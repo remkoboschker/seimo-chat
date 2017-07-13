@@ -19,6 +19,7 @@ describe('seismo service', () => {
     this.clock.restore();
   });
 
+  // there is an issue with this test, but I have not found out what's going on
   it('should request data and update contract every interval', (done) => {
     const getSpy = sinon.stub().resolves('seismo');
     const put = sinon.stub().resolves('tx_id');
