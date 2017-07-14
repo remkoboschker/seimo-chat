@@ -20,7 +20,7 @@ Each in a different console run
 3. ``node --harmony index client --name mike``
 3. ``node --harmony index client --name julie``
 
-In the client consoles you can type a message followed by ``>>>barry`` (or mike or julie) and press return. The message will be sent to the other console and the text is manipulated according to the seismic activity
+In the client consoles you can type a message followed by ``>>barry`` (or mike or julie) and press return. The message will be sent to the other console and the text is manipulated according to the seismic activity
 
 ## Design
 
